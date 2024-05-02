@@ -3,13 +3,13 @@ package com.example.newsapp.ui.fragments
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
-import androidx.fragment.app.Fragment
 import android.view.View
 import android.widget.AbsListView
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,7 +21,7 @@ import com.example.newsapp.ui.adapters.NewsAdapter
 import com.example.newsapp.util.Constants
 import com.example.newsapp.util.Resource
 
-class HeadlinesFragment: Fragment() {
+class HeadlinesFragment: Fragment(R.layout.fragment_headlines) {
 
     lateinit var newsViewModel: NewsViewModel
     lateinit var newsAdapter: NewsAdapter
@@ -49,12 +49,12 @@ class HeadlinesFragment: Fragment() {
             val bundle = Bundle().apply {
                 putSerializable("article",it)
             }
-            findNavController().navigate(R.id.action_headlinesFragment2_to_articleFragment,bundle)
+            findNavController().navigate(R.id.action_headlinesFragment_to_articleFragment,bundle)
         }
 
         newsViewModel.headlines.observe(viewLifecycleOwner) { response ->
             when (response) {
-                is Resource.Success<*> -> {
+                is Resource.Success -> {
                     hideProgressBar()
                     hideErrorMassage()
                     response.data?.let {newsResponse ->
@@ -67,7 +67,7 @@ class HeadlinesFragment: Fragment() {
                     }
                 }
 
-                is Resource.Error<*> -> {
+                is Resource.Error -> {
                     hideProgressBar()
                     response.message?.let { message ->
                         Toast.makeText(activity, "Sorry error: $message", Toast.LENGTH_LONG).show()
@@ -76,10 +76,13 @@ class HeadlinesFragment: Fragment() {
 
                 }
 
-                is Resource.Loading<*> -> {
+                is Resource.Loading -> {
                     showProgressBar()
                 }
             }
+        }
+        retryButton.setOnClickListener {
+            newsViewModel.getHeadlines("us")
         }
     }
     var isError = false
@@ -145,6 +148,6 @@ class HeadlinesFragment: Fragment() {
                 adapter = newsAdapter
                 layoutManager = LinearLayoutManager(activity)
                 addOnScrollListener(this@HeadlinesFragment.scrollListener)
+            }
         }
-    }
 }
